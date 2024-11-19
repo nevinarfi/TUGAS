@@ -301,6 +301,38 @@ function ShowClassic({
     setUsingKeyboardInTablist(usingKeyboardInTablist);
   };
 
+  // leave page confirmation if code is not saved
+
+  useEffect(() => {
+    let isFilesSaved = true;
+
+    const savedChallengeFiles = savedChallenges[0]?.challengeFiles;
+
+    if (!challengeFiles) return;
+
+    for (let index = 0; index < challengeFiles.length; index++) {
+      const hasChangedContentAfterSave =
+        savedChallengeFiles &&
+        savedChallengeFiles[index]?.contents != challengeFiles[index]?.contents;
+
+      if (!savedChallengeFiles || hasChangedContentAfterSave) {
+        isFilesSaved = false;
+      }
+    }
+
+    if (isFilesSaved) return;
+
+    function onbeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+    }
+
+    window.addEventListener('beforeunload', onbeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', onbeforeUnload);
+    };
+  }, [challengeFiles, savedChallenges]);
+
   // AB testing Pre-fetch in the Spanish locale
   const isPreFetchEnabled = useFeature('prefetch_ab_test').on;
   useEffect(() => {
