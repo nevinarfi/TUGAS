@@ -107,7 +107,6 @@ const ShowFillInTheBlank = ({
   const [allBlanksFilled, setAllBlanksFilled] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [isScenePlaying, setIsScenePlaying] = useState(false);
 
   const container = useRef<HTMLElement | null>(null);
 
@@ -184,8 +183,7 @@ const ShowFillInTheBlank = ({
     setShowWrong(false);
   };
 
-  const handlePlayScene = (shouldPlay: boolean) => {
-    setIsScenePlaying(shouldPlay);
+  const handlePlayScene = () => {
     sceneSubject.notify();
   };
 
@@ -201,7 +199,7 @@ const ShowFillInTheBlank = ({
       containerRef={container}
       nextChallengePath={challengeMeta.nextChallengePath}
       prevChallengePath={challengeMeta.prevChallengePath}
-      playScene={() => handlePlayScene(true)}
+      playScene={handlePlayScene}
     >
       <LearnLayout>
         <Helmet
@@ -222,14 +220,7 @@ const ShowFillInTheBlank = ({
               <Spacer size='m' />
             </Col>
 
-            {scene && (
-              <Scene
-                scene={scene}
-                sceneSubject={sceneSubject}
-                isPlaying={isScenePlaying}
-                setIsPlaying={setIsScenePlaying}
-              />
-            )}
+            {scene && <Scene scene={scene} sceneSubject={sceneSubject} />}
 
             <Col md={8} mdOffset={2} sm={10} smOffset={1} xs={12}>
               {instructions && (
