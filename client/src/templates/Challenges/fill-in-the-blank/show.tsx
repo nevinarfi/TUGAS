@@ -30,6 +30,7 @@ import {
   initTests
 } from '../redux/actions';
 import Scene from '../components/scene/scene';
+import { SceneSubject } from '../components/scene/scene-subject';
 import { isChallengeCompletedSelector } from '../redux/selectors';
 
 import './show.css';
@@ -185,11 +186,14 @@ const ShowFillInTheBlank = ({
 
   const handlePlayScene = (shouldPlay: boolean) => {
     setIsScenePlaying(shouldPlay);
+    sceneSubject.notify();
   };
 
   const blockNameTitle = `${t(
     `intro:${superBlock}.blocks.${block}.title`
   )} - ${title}`;
+
+  const sceneSubject = new SceneSubject();
 
   return (
     <Hotkeys
@@ -221,6 +225,7 @@ const ShowFillInTheBlank = ({
             {scene && (
               <Scene
                 scene={scene}
+                sceneSubject={sceneSubject}
                 isPlaying={isScenePlaying}
                 setIsPlaying={setIsScenePlaying}
               />
