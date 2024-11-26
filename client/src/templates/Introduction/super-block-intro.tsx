@@ -1,7 +1,7 @@
 import { WindowLocation } from '@reach/router';
 import { graphql } from 'gatsby';
-import { uniq } from 'lodash-es';
-import React, { Fragment, useEffect, memo, useMemo } from 'react';
+import { uniq, isEmpty, last } from 'lodash-es';
+import React, { useEffect, memo, useMemo } from 'react';
 import Helmet from 'react-helmet';
 import { useTranslation, withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
@@ -42,7 +42,7 @@ type FetchState = {
   errored: boolean;
 };
 
-type SuperBlockProp = {
+type SuperBlockProps = {
   currentChallengeId: string;
   data: {
     allChallengeNode: { nodes: ChallengeNode[] };
@@ -100,7 +100,7 @@ const mapDispatchToProps = (dispatch: Dispatch) =>
     dispatch
   );
 
-const SuperBlockIntroductionPage = (props: SuperBlockProp) => {
+const SuperBlockIntroductionPage = (props: SuperBlockProps) => {
   const { t } = useTranslation();
   useEffect(() => {
     initializeExpandedState();
@@ -123,8 +123,9 @@ const SuperBlockIntroductionPage = (props: SuperBlockProp) => {
       },
       isSignedIn,
       currentChallengeId,
-      location
-    }: SuperBlockProp = props;
+      location,
+      user: { completedChallenges }
+    }: SuperBlockProps = props;
 
     // if coming from breadcrumb click
     if (
@@ -152,7 +153,24 @@ const SuperBlockIntroductionPage = (props: SuperBlockProp) => {
         node => node.challenge.id === currentChallengeId
       )?.challenge;
 
-      return currentChallenge ? currentChallenge.block : firstChallenge?.block;
+      if (currentChallenge) return currentChallenge.block;
+
+      // We have stopped recording the `currentChallengeId`
+      // so we don't know which challenge/block the user was last on.
+      // The closest to that is the last completed challenge,
+      // which is the last item of the `completedChallenge` array.
+      // NOTE: This `if` block is not needed if/when we start using `currentChallengeId` again.
+      if (!isEmpty(completedChallenges)) {
+        const lastCompletedChallengeId = last(completedChallenges)?.id;
+
+        const lastCompletedChallenge = nodes.find(
+          node => node.challenge.id === lastCompletedChallengeId
+        )?.challenge;
+
+        if (lastCompletedChallenge) return lastCompletedChallenge.block;
+      }
+
+      return firstChallenge?.block;
     }
 
     return firstChallenge?.block;
