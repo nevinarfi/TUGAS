@@ -322,6 +322,34 @@ const ShowCertification = (props: ShowCertificationProps): JSX.Element => {
         >
           {t('profile.add-twitter')}
         </Button>
+        <Spacer size='m' />
+        <Button
+          block={true}
+          size='large'
+          variant='primary'
+          href={`https://bsky.app/intent/compose?text=${t('profile.tweet', {
+            certTitle: urlFriendlyCertTitle,
+            certURL: certURL
+          })}`}
+          target='_blank'
+          data-playwright-test-label='bluesky-share-btn'
+        >
+          {t('profile.add-bluesky')}
+        </Button>
+        <Spacer size='m' />
+        <Button
+          block={true}
+          size='large'
+          variant='primary'
+          href={`https://threads.net/intent/post?text=${t('profile.tweet', {
+            certTitle: urlFriendlyCertTitle,
+            certURL: certURL
+          })}`}
+          target='_blank'
+          data-playwright-test-label='insta-share-btn'
+        >
+          {t('profile.add-insta')}
+        </Button>
       </Col>
       <Spacer size='l' />
     </Row>
