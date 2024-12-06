@@ -78,6 +78,8 @@ const testUserData: Prisma.userCreateInput = {
   ],
   partiallyCompletedChallenges: [{ id: '123', completedDate: 123 }],
   completedExams: [],
+  completedModules: [{ id: 'basic-html', completedDate: 1733875200000 }],
+  completedChapters: [{ id: 'html', completedDate: 1733961600000 }],
   githubProfile: 'github.com/foobar',
   website: 'https://www.freecodecamp.org',
   donationEmails: ['an@add.ress'],
@@ -210,6 +212,8 @@ const publicUserData = {
     }
   ],
   completedExams: testUserData.completedExams,
+  completedModules: testUserData.completedModules,
+  completedChapters: testUserData.completedChapters,
   completedSurveys: [], // TODO: add surveys
   githubProfile: testUserData.githubProfile,
   is2018DataVisCert: testUserData.is2018DataVisCert,
@@ -281,6 +285,8 @@ const baseProgressData = {
   isCollegeAlgebraPyCertV8: false,
   completedChallenges: [],
   completedExams: [],
+  completedModules: [],
+  completedChapters: [],
   savedChallenges: [],
   partiallyCompletedChallenges: [],
   needsModeration: false
@@ -713,6 +719,8 @@ describe('userRoutes', () => {
           currentChallengeId: '',
           completedChallenges: [],
           completedExams: [],
+          completedModules: [],
+          completedChapters: [],
           completedSurveys: [],
           partiallyCompletedChallenges: [],
           portfolio: [],
