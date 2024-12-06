@@ -28,6 +28,7 @@ import Scene from '../components/scene/scene';
 import MultipleChoiceQuestions from '../components/multiple-choice-questions';
 import ChallengeExplanation from '../components/challenge-explanation';
 import HelpModal from '../components/help-modal';
+import { useScene } from '../components/scene/use-scene';
 
 // Styles
 import './show.css';
@@ -81,7 +82,7 @@ const ShowGeneric = ({
         questions,
         title,
         translationPending,
-        scene,
+        scene: initSceneData,
         superBlock,
         videoId,
         videoLocaleIds
@@ -124,8 +125,9 @@ const ShowGeneric = ({
     setVideoIsLoaded(true);
   };
 
-  // scene
-  const [isScenePlaying, setIsScenePlaying] = useState(false);
+  const scene = useScene({
+    initSceneData
+  });
 
   // assignments
   const [assignmentsCompleted, setAssignmentsCompleted] = useState(0);
@@ -178,7 +180,7 @@ const ShowGeneric = ({
       containerRef={container}
       nextChallengePath={nextChallengePath}
       prevChallengePath={prevChallengePath}
-      playScene={scene ? () => setIsScenePlaying(true) : undefined}
+      playScene={initSceneData ? () => scene.setIsPlaying(true) : undefined}
     >
       <LearnLayout>
         <Helmet
@@ -214,13 +216,7 @@ const ShowGeneric = ({
               )}
             </Col>
 
-            {scene && (
-              <Scene
-                scene={scene}
-                isPlaying={isScenePlaying}
-                setIsPlaying={setIsScenePlaying}
-              />
-            )}
+            {initSceneData && <Scene {...scene} />}
 
             <Col md={8} mdOffset={2} sm={10} smOffset={1} xs={12}>
               {instructions && (

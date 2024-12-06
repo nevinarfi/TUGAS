@@ -74,8 +74,9 @@ export interface VideoLocaleIds {
 }
 
 // English types for animations
-interface Dialogue {
+export interface Dialogue {
   text: string;
+  label: string;
   align: 'left' | 'right' | 'center';
 }
 
@@ -210,7 +211,7 @@ export type ChallengeNode = {
     quizzes: Quiz[];
     assignments: string[];
     required: Required[];
-    scene: FullScene;
+    scene: FullScene | null;
     solutions: {
       [T in FileKey]: FileKeyChallenge;
     };
