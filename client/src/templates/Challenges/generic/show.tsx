@@ -28,6 +28,7 @@ import Scene from '../components/scene/scene';
 import MultipleChoiceQuestions from '../components/multiple-choice-questions';
 import ChallengeExplanation from '../components/challenge-explanation';
 import HelpModal from '../components/help-modal';
+import { SceneSubject } from '../components/scene/scene-subject';
 
 // Styles
 import './show.css';
@@ -124,9 +125,6 @@ const ShowGeneric = ({
     setVideoIsLoaded(true);
   };
 
-  // scene
-  const [isScenePlaying, setIsScenePlaying] = useState(false);
-
   // assignments
   const [assignmentsCompleted, setAssignmentsCompleted] = useState(0);
   const allAssignmentsCompleted = assignmentsCompleted === assignments.length;
@@ -172,13 +170,15 @@ const ShowGeneric = ({
     }
   };
 
+  const sceneSubject = new SceneSubject();
+
   return (
     <Hotkeys
       executeChallenge={handleSubmit}
       containerRef={container}
       nextChallengePath={nextChallengePath}
       prevChallengePath={prevChallengePath}
-      playScene={scene ? () => setIsScenePlaying(true) : undefined}
+      playScene={scene ? () => sceneSubject.notify() : undefined}
     >
       <LearnLayout>
         <Helmet
@@ -214,13 +214,7 @@ const ShowGeneric = ({
               )}
             </Col>
 
-            {scene && (
-              <Scene
-                scene={scene}
-                isPlaying={isScenePlaying}
-                setIsPlaying={setIsScenePlaying}
-              />
-            )}
+            {scene && <Scene scene={scene} sceneSubject={sceneSubject} />}
 
             <Col md={8} mdOffset={2} sm={10} smOffset={1} xs={12}>
               {instructions && (
