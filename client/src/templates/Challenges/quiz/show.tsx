@@ -44,7 +44,7 @@ import {
   submitQuizAttempt
 } from '../redux/actions';
 import { isSignedInSelector, userSelector } from '../../../redux/selectors';
-import { Link } from '../../../components/helpers';
+import { ButtonLink, Link } from '../../../components/helpers';
 import superBlockStructure from '../../../../../curriculum/superblock-structure/full-stack.json';
 import {
   isChallengeCompletedSelector,
@@ -187,7 +187,7 @@ const ShowQuiz = ({
   // the value of `isPassed` is set when campers click the finish quiz button,
   // while `isChallengeCompleted` comes from the DB and is only set to `true`
   // when campers click the submit button on the completion modal.
-  const [isPassed, setIsPassed] = useState(false);
+  const [isPassed, setIsPassed] = useState<null | boolean>(null);
 
   const [showUnanswered, setShowUnanswered] = useState(false);
 
@@ -203,12 +203,7 @@ const ShowQuiz = ({
 
   const timeUntilCooldownExpires = attemptedQuiz
     ? attemptedQuiz.timestamp + COOL_DOWN_PERIOD_IN_MS - Date.now()
-    : null;
-
-  const isNotAllowedToStartQuiz =
-    !isChallengeCompleted &&
-    timeUntilCooldownExpires &&
-    timeUntilCooldownExpires > 0;
+    : 0;
 
   const [availableQuizzes] = useState(
     getAvailableQuizzes({ quizzes, attemptedQuiz })
@@ -285,8 +280,14 @@ const ShowQuiz = ({
     }
   });
 
-  const isQuizDisabled =
-    !isNotAllowedToStartQuiz || isQuizAttemptSubmitting || validated;
+  // We show the quiz if:
+  // - Campers have successfully completed the quiz
+  // - Campers failed the quiz but the cooldown period has expired
+  // - Campers just finished answering the quiz and are shown the quiz feedback (`isPassed` not being null)
+  const shouldShowQuiz =
+    isChallengeCompleted || timeUntilCooldownExpires <= 0 || isPassed !== null;
+
+  const isQuizDisabled = isQuizAttemptSubmitting || validated;
 
   const unanswered = quizData.reduce<number[]>(
     (acc, curr, id) => (curr.selectedAnswer == null ? [...acc, id + 1] : acc),
@@ -350,10 +351,14 @@ const ShowQuiz = ({
 
   const onWindowClose = useCallback(
     (event: BeforeUnloadEvent) => {
+      if (!shouldShowQuiz) {
+        return;
+      }
+
       event.preventDefault();
       window.confirm(t('misc.navigation-warning'));
     },
-    [t]
+    [t, shouldShowQuiz]
   );
 
   const onHistoryChange = useCallback(() => {
@@ -362,13 +367,19 @@ const ShowQuiz = ({
     //   - If they don't pass, the Finish Quiz button is disabled, there isn't anything for them to do other than leaving the page
     //   - If they pass, the Submit-and-go button shows up, and campers should be allowed to leave the page
     // - When they have clicked the exit button on the exit modal
-    if (isQuizDisabled || exitConfirmed) {
+    if (!shouldShowQuiz || isQuizDisabled || exitConfirmed) {
       return;
     }
 
     void navigate(`${curLocation.pathname}`);
     openExitQuizModal();
-  }, [curLocation.pathname, isQuizDisabled, exitConfirmed, openExitQuizModal]);
+  }, [
+    curLocation.pathname,
+    isQuizDisabled,
+    exitConfirmed,
+    openExitQuizModal,
+    shouldShowQuiz
+  ]);
 
   usePageLeave({
     onWindowClose,
@@ -439,55 +450,67 @@ const ShowQuiz = ({
 
             <Col md={8} mdOffset={2} sm={10} smOffset={1} xs={12}>
               <Spacer size='m' />
-              {!isNotAllowedToStartQuiz && reviewBlock && (
-                <Callout variant='danger'>
-                  {
-                    <Trans i18nKey='learn.quiz.review-material-and-try-again-later'>
-                      <Link
-                        to={`/learn/${superBlock}/#${reviewBlock.dashedName}`}
-                      >
-                        placeholder
-                      </Link>
-                    </Trans>
-                  }
-                </Callout>
-              )}
-              <Spacer size='m' />
-              <ChallengeDescription description={description} />
-              <Spacer size='l' />
-              <ObserveKeys>
-                <Quiz questions={quizData} disabled={isQuizDisabled} />
-              </ObserveKeys>
-              <Spacer size='m' />
-              <div aria-live='polite' aria-atomic='true'>
-                {errorMessage}
-              </div>
-              <Spacer size='m' />
-              {!isPassed ? (
+              {!shouldShowQuiz && reviewBlock ? (
                 <>
+                  <Callout variant='danger'>
+                    {
+                      <Trans i18nKey='learn.quiz.review-material-and-try-again-later'>
+                        <Link
+                          to={`/learn/${superBlock}/#${reviewBlock.dashedName}`}
+                        >
+                          placeholder
+                        </Link>
+                      </Trans>
+                    }
+                  </Callout>
+                  <Spacer size='m' />
+                  <ButtonLink block href={`/learn/${superBlock}/#${block}`}>
+                    {t('buttons.go-back-to-curriculum')}
+                  </ButtonLink>
+                </>
+              ) : (
+                <>
+                  <ChallengeDescription description={description} />
+                  <Spacer size='l' />
+                  <ObserveKeys>
+                    <Quiz questions={quizData} disabled={isQuizDisabled} />
+                  </ObserveKeys>
+                  <Spacer size='m' />
+                  <div aria-live='polite' aria-atomic='true'>
+                    {errorMessage}
+                  </div>
+                  <Spacer size='m' />
+                  {!isPassed ? (
+                    <>
+                      <Button
+                        block={true}
+                        variant='primary'
+                        onClick={handleFinishQuiz}
+                        disabled={isQuizDisabled}
+                      >
+                        {t('buttons.finish-quiz')}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      block={true}
+                      variant='primary'
+                      onClick={handleSubmitAndGo}
+                    >
+                      {t('buttons.submit-and-go')}
+                    </Button>
+                  )}
+                  <Spacer size='xxs' />
                   <Button
                     block={true}
                     variant='primary'
-                    onClick={handleFinishQuiz}
-                    disabled={isQuizDisabled}
+                    onClick={handleExitQuiz}
                   >
-                    {t('buttons.finish-quiz')}
+                    {t('buttons.exit-quiz')}
                   </Button>
+                  <Spacer size='l' />
                 </>
-              ) : (
-                <Button
-                  block={true}
-                  variant='primary'
-                  onClick={handleSubmitAndGo}
-                >
-                  {t('buttons.submit-and-go')}
-                </Button>
               )}
-              <Spacer size='xxs' />
-              <Button block={true} variant='primary' onClick={handleExitQuiz}>
-                {t('buttons.exit-quiz')}
-              </Button>
-              <Spacer size='l' />
             </Col>
           </Row>
         </Container>
