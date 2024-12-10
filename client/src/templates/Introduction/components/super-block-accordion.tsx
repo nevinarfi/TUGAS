@@ -104,6 +104,10 @@ const Module = ({ dashedName, children, isExpanded }: ModuleProps) => {
   );
 };
 
+const Badge = ({ children }: { children: ReactNode }) => (
+  <span className='badge'>{children}</span>
+);
+
 export const SuperBlockAccordion = ({
   challenges,
   superBlock,
@@ -155,7 +159,11 @@ export const SuperBlockAccordion = ({
             </li>
           );
         } else if (chapter.modules.length === 0) {
-          return <li key={chapter.name}>Chapter coming soon</li>;
+          return (
+            <li key={chapter.name}>
+              <Badge>Coming soon</Badge> Chapter name
+            </li>
+          );
         }
 
         return (
@@ -179,7 +187,11 @@ export const SuperBlockAccordion = ({
                   </li>
                 );
               } else if (module.blocks.length === 0) {
-                return <li key={chapter.name}>Module coming soon</li>;
+                return (
+                  <li key={chapter.name}>
+                    <Badge>Coming soon</Badge> Module name
+                  </li>
+                );
               }
 
               return (
