@@ -113,6 +113,7 @@ export const SuperBlockAccordion = ({
   superBlock,
   chosenBlock
 }: SuperBlockTreeViewProps) => {
+  const { t } = useTranslation();
   const { allChapters } = useMemo(() => {
     const populateBlocks = (blocks: { dashedName: string }[]) =>
       blocks.map(block => {
@@ -161,7 +162,8 @@ export const SuperBlockAccordion = ({
         } else if (chapter.modules.length === 0) {
           return (
             <li key={chapter.name}>
-              <Badge>Coming soon</Badge> Chapter name
+              <Badge>{t('misc.coming-soon')}</Badge>{' '}
+              {t(`intro:full-stack-developer.chapters.${chapter.name}`)}
             </li>
           );
         }
@@ -189,7 +191,8 @@ export const SuperBlockAccordion = ({
               } else if (module.blocks.length === 0) {
                 return (
                   <li key={chapter.name}>
-                    <Badge>Coming soon</Badge> Module name
+                    <Badge>{t('misc.coming-soon')}</Badge>{' '}
+                    {t(`intro:full-stack-developer.modules.${module.name}`)}
                   </li>
                 );
               }
